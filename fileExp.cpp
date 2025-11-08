@@ -5,15 +5,12 @@
 #include <unistd.h>
 #include <cstring>
 #include <vector>
-
 using namespace std;
 
-// ---------- Utility ----------
 void printLine() { 
     cout << "========================================" << endl; 
 }
 
-// ---------- Command History ----------
 void logCommand(const string &cmd) {
     ofstream log("history.txt", ios::app);
     if (log) log << cmd << endl;
@@ -22,7 +19,7 @@ void logCommand(const string &cmd) {
 void showHistory() {
     ifstream log("history.txt");
     string line;
-    cout << "\n📜 Command History:\n";
+    cout << "\nCommand History:\n";
     printLine();
     if (log) {
         while (getline(log, line))
@@ -33,7 +30,6 @@ void showHistory() {
     printLine();
 }
 
-// ---------- Progress Bar ----------
 void progressBar(size_t current, size_t total) {
     int width = 40;
     float ratio = (total > 0) ? (float)current / total : 1.0;
@@ -45,18 +41,17 @@ void progressBar(size_t current, size_t total) {
     cout.flush();
 }
 
-// ---------- Copy File with Progress ----------
 bool copyFileWithProgress(const string &src, const string &dest) {
     ifstream in(src, ios::binary);
     ofstream out(dest, ios::binary);
     
     if (!in) {
-        cerr << "\n❌ Cannot open source file: " << src << endl;
+        cerr << "\nCannot open source file: " << src << endl;
         return false;
     }
     
     if (!out) {
-        cerr << "\n❌ Cannot create destination file: " << dest << endl;
+        cerr << "\nCannot create destination file: " << dest << endl;
         return false;
     }
 
@@ -72,13 +67,12 @@ bool copyFileWithProgress(const string &src, const string &dest) {
         out.write(buffer, in.gcount());
         copied += in.gcount();
         progressBar(copied, total);
-        usleep(30000); // simulate delay for visible progress
+        usleep(30000); 
     }
     cout << endl;
     return true;
 }
 
-// ---------- List Files ----------
 void listFiles() {
     DIR *dir;
     struct dirent *entry;
@@ -86,13 +80,13 @@ void listFiles() {
 
     dir = opendir(".");
     if (dir == NULL) {
-        cerr << "❌ Unable to open directory" << endl;
+        cerr << "Unable to open directory" << endl;
         return;
     }
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    cout << "\n📂 Current Directory: " << cwd << endl;
+    cout << "\n📂Current Directory: " << cwd << endl;
     printLine();
 
     while ((entry = readdir(dir)) != NULL) {
@@ -112,7 +106,6 @@ void listFiles() {
     closedir(dir);
 }
 
-// ---------- Search File Recursively ----------
 void searchFile(const string &target, const string &path = ".") {
     DIR *dir = opendir(path.c_str());
     if (!dir) return;
@@ -131,7 +124,7 @@ void searchFile(const string &target, const string &path = ".") {
             continue;
 
         if (name == target)
-            cout << "✅ Found: " << fullPath << endl;
+            cout << "Found: " << fullPath << endl;
 
         if (S_ISDIR(fileStat.st_mode))
             searchFile(target, fullPath);
@@ -139,16 +132,15 @@ void searchFile(const string &target, const string &path = ".") {
     closedir(dir);
 }
 
-// ---------- Permissions ----------
 void viewPermissions(const string &filename) {
     struct stat fileStat;
     
     if (stat(filename.c_str(), &fileStat) == -1) {
-        perror("❌ Error reading file");
+        perror("Error reading file");
         return;
     }
 
-    cout << "\n🔒 Permissions for: " << filename << endl;
+    cout << "\nPermissions for: " << filename << endl;
     cout << "User: "
          << ((fileStat.st_mode & S_IRUSR) ? "r" : "-")
          << ((fileStat.st_mode & S_IWUSR) ? "w" : "-")
@@ -165,38 +157,36 @@ void viewPermissions(const string &filename) {
 
 void changePermissions(const string &filename, mode_t mode) {
     if (chmod(filename.c_str(), mode) == 0)
-        cout << "✅ Permissions updated for: " << filename << endl;
+        cout << "Permissions updated for: " << filename << endl;
     else
-        perror("❌ Failed to change permissions");
+        perror("Failed to change permissions");
 }
 
-// ---------- Move/Rename File ----------
 void moveFile(const string &source, const string &dest) {
     if (rename(source.c_str(), dest.c_str()) == 0)
-        cout << "🚚 Moved/Renamed: " << source << " → " << dest << endl;
+        cout << "Moved/Renamed: " << source << " → " << dest << endl;
     else
-        perror("❌ Move failed");
+        perror("Move failed");
 }
 
-// ---------- View File Contents ----------
 void viewFile(const string &filename) {
     ifstream file(filename);
     if (file) {
-        cout << "\n📖 Contents of " << filename << ":\n";
+        cout << "\nContents of " << filename << ":\n";
         printLine();
         string line;
         while (getline(file, line))
             cout << line << endl;
         printLine();
     } else {
-        cerr << "❌ Cannot open file: " << filename << endl;
+        cerr << "Cannot open file: " << filename << endl;
     }
 }
 
-// ---------- Help ----------
+
 void showHelp() {
     printLine();
-    cout << "📘 Available Commands:\n"
+    cout << "Available Commands:\n"
          << "  ls                        → list files\n"
          << "  cd <folder>               → open folder\n"
          << "  cd..                      → go up one level\n"
@@ -214,14 +204,9 @@ void showHelp() {
     printLine();
 }
 
-// ---------- Main ----------
+
 int main() {
     string command;
-    
-    cout << "========================================\n"
-         << "   🧭 FILE EXPLORER - ENHANCED PRO   \n"
-         << "========================================" << endl;
-
     listFiles();
     showHelp();
 
@@ -231,10 +216,10 @@ int main() {
         cout << "\n" << cwd << " > ";
         getline(cin, command);
 
-        logCommand(command); // store every command
+        logCommand(command);
 
         if (command == "exit") {
-            cout << "👋 Exiting File Explorer..." << endl;
+            cout << "Exiting File Explorer..." << endl;
             break;
         }
         else if (command == "help") {
@@ -250,7 +235,7 @@ int main() {
             if (chdir("..") == 0) {
                 listFiles();
             } else {
-                perror("❌ Cannot move up");
+                perror("Cannot move up");
             }
         }
         else if (command.rfind("cd ", 0) == 0 && command.length() > 3) {
@@ -258,26 +243,26 @@ int main() {
             if (chdir(path.c_str()) == 0) {
                 listFiles();
             } else {
-                perror("❌ Cannot change directory");
+                perror("Cannot change directory");
             }
         }
         else if (command.rfind("touch ", 0) == 0 && command.length() > 6) {
             string filename = command.substr(6);
             ofstream file(filename);
             if (file) {
-                cout << "✅ Created file: " << filename << endl;
+                cout << "Created file: " << filename << endl;
                 listFiles();
             } else {
-                cerr << "❌ Failed to create file" << endl;
+                cerr << "Failed to create file" << endl;
             }
         }
         else if (command.rfind("del ", 0) == 0 && command.length() > 4) {
             string filename = command.substr(4);
             if (remove(filename.c_str()) == 0) {
-                cout << "🗑️  Deleted: " << filename << endl;
+                cout << "Deleted: " << filename << endl;
                 listFiles();
             } else {
-                perror("❌ Cannot delete file");
+                perror("Cannot delete file");
             }
         }
         else if (command.rfind("open ", 0) == 0 && command.length() > 5) {
@@ -291,10 +276,10 @@ int main() {
                 string src = args.substr(0, sp);
                 string dest = args.substr(sp + 1);
                 if (copyFileWithProgress(src, dest)) {
-                    cout << "📋 Successfully copied: " << src << " → " << dest << endl;
+                    cout << "Successfully copied: " << src << " → " << dest << endl;
                 }
             } else {
-                cout << "⚠️  Usage: copy <src> <dest>" << endl;
+                cout << "Usage: copy <src> <dest>" << endl;
             }
         }
         else if (command.rfind("move ", 0) == 0 && command.length() > 5) {
@@ -305,7 +290,7 @@ int main() {
                 string dest = args.substr(sp + 1);
                 moveFile(src, dest);
             } else {
-                cout << "⚠️  Usage: move <src> <dest>" << endl;
+                cout << "Usage: move <src> <dest>" << endl;
             }
         }
         else if (command.rfind("search ", 0) == 0 && command.length() > 7) {
@@ -326,11 +311,11 @@ int main() {
                 mode_t mode = strtol(modeStr.c_str(), NULL, 8);
                 changePermissions(filename, mode);
             } else {
-                cout << "⚠️  Usage: chmod <file> <octal>" << endl;
+                cout << " Usage: chmod <file> <octal>" << endl;
             }
         }
         else {
-            cout << "⚠️  Unknown command! Type 'help' to see options." << endl;
+            cout << " Unknown command! Type 'help' to see options." << endl;
         }
     }
     
