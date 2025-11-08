@@ -1,0 +1,10 @@
+ls
+history
+prem test
+prem test_foler
+search main.cpp
+help
+history
+touch test2.txt
+del test2.txt
+exit
