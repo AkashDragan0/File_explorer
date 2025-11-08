@@ -1,0 +1,12 @@
+# Ignore compiled binaries and local test files
+explorer
+test
+a.out
+
+# Ignore folders
+.vscode/
+test_folder/
+
+# Ignore logs or history
+history.txt
+*.tmp
